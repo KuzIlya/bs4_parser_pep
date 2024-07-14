@@ -136,7 +136,7 @@ def pep(session):
             EXPECTED_STATUS[pep_status] = EXPECTED_STATUS.get(
                 pep_status, 0
             ) + 1
-        
+
         except ConnectionError as e:
             error_message = f"ConnectionError while processing {pep_url}: {e}"
             errors.append(error_message)
