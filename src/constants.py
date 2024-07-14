@@ -11,8 +11,6 @@ LOG_FILE = LOG_DIR / 'parser.log'
 
 PARSER_CHOICES = ('pretty', 'file')
 
-DOWNLOAD_DIR = BASE_DIR / 'downloads'
-
 MAIN_PEP_URL = 'https://peps.python.org/'
 
 EXPECTED_STATUS = {
