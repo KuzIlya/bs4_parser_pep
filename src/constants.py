@@ -9,8 +9,6 @@ MAIN_DOC_URL = 'https://docs.python.org/3/'
 LOG_DIR = BASE_DIR / 'logs'
 LOG_FILE = LOG_DIR / 'parser.log'
 
-RESULTS_DIR = BASE_DIR / 'results'
-
 PARSER_CHOICES = ('pretty', 'file')
 
 MAIN_PEP_URL = 'https://peps.python.org/'
