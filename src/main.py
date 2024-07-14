@@ -28,17 +28,26 @@ def whats_new(session):
     )
 
     results = [('Ссылка на статью', 'Заголовок', 'Редактор, автор')]
+    error_messages = []
 
     for section in tqdm(sections_by_python):
         version_a_tag = section.find('a')
         version_link = urljoin(whats_new_url, version_a_tag['href'])
-        h1 = find_tag(create_soup(session, version_link), 'h1')
-        dl = find_tag(create_soup(session, version_link), 'dl')
-        dl_text = dl.text.replace('\n', ' ')
+        try:
+            soup = create_soup(session, version_link)
+            h1 = find_tag(soup, 'h1')
+            dl = find_tag(soup, 'dl')
+            dl_text = dl.text.replace('\n', ' ')
 
-        results.append(
-            (version_link, h1.text, dl_text)
-        )
+            results.append(
+                (version_link, h1.text, dl_text)
+            )
+        except ConnectionError as e:
+            error_messages.append(f"Error fetching {version_link}: {str(e)}")
+            continue
+
+    for error_message in error_messages:
+        logging.error(error_message)
 
     return results
 
@@ -46,7 +55,9 @@ def whats_new(session):
 def latest_versions(session):
 
     sidebar = find_tag(
-        create_soup, 'div', {'class': 'sphinxsidebarwrapper'}
+        create_soup(session, MAIN_DOC_URL),
+        'div',
+        {'class': 'sphinxsidebarwrapper'}
     )
     ul_tags = sidebar.find_all('ul')
 
@@ -100,6 +111,8 @@ def download(session):
 
 def pep(session):
 
+    errors = []
+
     numerical_index = find_tag(
         create_soup(session, MAIN_PEP_URL), 'section',
         {'id': 'numerical-index'}
@@ -110,21 +123,26 @@ def pep(session):
         pep_link = tag.td.find_next_sibling().find('a')['href']
         pep_url = urljoin(MAIN_PEP_URL, pep_link)
 
-        pep_information = find_tag(create_soup(session, pep_url), 'dl')
-
-        pep_statuses = find_tag(
-            pep_information,
-            lambda tag: tag.name == 'dt' and 'Status' in tag.text
-        )
-
-        pep_status = pep_statuses.find_next_sibling().text
-
         try:
+            pep_information = find_tag(create_soup(session, pep_url), 'dl')
+
+            pep_statuses = find_tag(
+                pep_information,
+                lambda tag: tag.name == 'dt' and 'Status' in tag.text
+            )
+
+            pep_status = pep_statuses.find_next_sibling().text
+
             EXPECTED_STATUS[pep_status] = EXPECTED_STATUS.get(
                 pep_status, 0
             ) + 1
-        except KeyError:
-            logging.error(f'статуса {pep_status} нету')
+        
+        except ConnectionError as e:
+            error_message = f"ConnectionError while processing {pep_url}: {e}"
+            errors.append(error_message)
+
+    for error in errors:
+        logging.error(error)
 
     results = [('Статус', 'Количество')]
 

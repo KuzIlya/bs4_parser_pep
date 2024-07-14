@@ -6,10 +6,10 @@ from requests import RequestException
 from exceptions import ParserFindTagException
 
 
-def get_response(session, url):
+def get_response(session, url, encoding='utf-8'):
     try:
         response = session.get(url)
-        response.encoding = 'utf-8'
+        response.encoding = encoding
         return response
     except RequestException:
         logging.exception(
@@ -27,12 +27,9 @@ def find_tag(soup, tag, attrs=None):
     return searched_tag
 
 
-def create_soup(session, url):
+def create_soup(session, url, feature='lxml'):
     response = get_response(session, url)
 
-    if response is None:
-        raise RequestException('Не получен ответ от сервера')
-
-    soup = BeautifulSoup(response.text, features='lxml')
+    soup = BeautifulSoup(response.text, features=feature)
 
     return soup
