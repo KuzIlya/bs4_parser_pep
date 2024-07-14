@@ -6,10 +6,10 @@ import requests_cache
 from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
-from constants import BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, MAIN_PEP_URL
-from outputs import control_output
-from utils import find_tag, create_soup
+from constants import DOWNLOAD_DIR, EXPECTED_STATUS, MAIN_DOC_URL, MAIN_PEP_URL
 from exceptions import EmptyResponseException
+from outputs import control_output
+from utils import create_soup, find_tag
 
 
 def whats_new(session):
@@ -85,7 +85,7 @@ def download(session):
     archive_url = urljoin(downloads_url, pdf_a4_link)
     filename = archive_url.split('/')[-1]
 
-    downloads_dir = BASE_DIR / 'downloads'
+    downloads_dir = DOWNLOAD_DIR
     downloads_dir.mkdir(exist_ok=True)
     archive_path = downloads_dir / filename
 
@@ -98,8 +98,6 @@ def download(session):
 
 
 def pep(session):
-
-    logs_error = []
 
     numerical_index = find_tag(
         create_soup(session, MAIN_PEP_URL), 'section',
@@ -121,9 +119,11 @@ def pep(session):
         pep_status = pep_statuses.find_next_sibling().text
 
         try:
-            EXPECTED_STATUS[pep_status] += 1
+            EXPECTED_STATUS[pep_status] = EXPECTED_STATUS.get(
+                pep_status, 0
+            ) + 1
         except KeyError:
-            logs_error.append(logging.info(f'статуса {pep_status} нету'))
+            logging.error(f'статуса {pep_status} нету')
 
     results = [('Статус', 'Количество')]
 
@@ -146,20 +146,24 @@ def main():
     configure_logging()
     logging.info('Парсер запущен!')
 
-    arg_parser = configure_argument_parser(MODE_TO_FUNCTION.keys())
-    args = arg_parser.parse_args()
+    try:
+        arg_parser = configure_argument_parser(MODE_TO_FUNCTION.keys())
+        args = arg_parser.parse_args()
 
-    logging.info(f'Аргументы командной строки: {args}')
+        logging.info(f'Аргументы командной строки: {args}')
 
-    session = requests_cache.CachedSession()
-    if args.clear_cache:
-        session.cache.clear()
+        session = requests_cache.CachedSession()
+        if args.clear_cache:
+            session.cache.clear()
 
-    parser_mode = args.mode
-    results = MODE_TO_FUNCTION[parser_mode](session)
+        parser_mode = args.mode
+        results = MODE_TO_FUNCTION[parser_mode](session)
 
-    if results is not None:
-        control_output(results, args)
+        if results is not None:
+            control_output(results, args)
+
+    except Exception as error:
+        logging.error(error)
 
     logging.info('Парсер завершил работу.')
 

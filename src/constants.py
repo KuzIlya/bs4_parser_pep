@@ -6,6 +6,13 @@ DT_FORMAT = '%d.%m.%Y %H:%M:%S'
 LOG_FORMAT = '"%(asctime)s - [%(levelname)s] - %(message)s"'
 MAIN_DOC_URL = 'https://docs.python.org/3/'
 
+LOG_DIR = BASE_DIR / 'logs'
+LOG_FILE = LOG_DIR / 'parser.log'
+
+PARSER_CHOICES = ('pretty', 'file')
+
+DOWNLOAD_DIR = BASE_DIR / 'downloads'
+
 MAIN_PEP_URL = 'https://peps.python.org/'
 
 EXPECTED_STATUS = {
