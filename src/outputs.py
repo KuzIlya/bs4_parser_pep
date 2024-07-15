@@ -4,14 +4,14 @@ import logging
 
 from prettytable import PrettyTable
 
-from constants import BASE_DIR, DATETIME_FORMAT, PARSER_CHOICES
+from constants import DATETIME_FORMAT, FILE_CHOICE, PRETTY_CHOICE, RESULT_DIR
 
 
 def control_output(results, cli_args):
     output = cli_args.output
-    if output == PARSER_CHOICES[0]:
+    if output == PRETTY_CHOICE:
         pretty_output(results)
-    elif output == PARSER_CHOICES[1]:
+    elif output == FILE_CHOICE:
         file_output(results, cli_args)
     else:
         default_output(results)
@@ -31,7 +31,7 @@ def pretty_output(results):
 
 
 def file_output(results, cli_args):
-    results_dir = BASE_DIR / 'results'
+    results_dir = RESULT_DIR
     results_dir.mkdir(exist_ok=True)
 
     parser_mode = cli_args.mode

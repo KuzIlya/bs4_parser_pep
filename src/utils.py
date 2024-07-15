@@ -12,10 +12,7 @@ def get_response(session, url, encoding='utf-8'):
         response.encoding = encoding
         return response
     except RequestException:
-        logging.exception(
-            f'Возникла ошибка при загрузке страницы {url}',
-            stack_info=True
-        )
+        raise ConnectionError(f'Возникла ошибка при загрузке страницы {url}')
 
 
 def find_tag(soup, tag, attrs=None):
