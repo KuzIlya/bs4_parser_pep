@@ -6,7 +6,7 @@ import requests_cache
 from tqdm import tqdm
 
 from configs import configure_argument_parser, configure_logging
-from constants import DOWNLOAD_DIR, EXPECTED_STATUS, MAIN_DOC_URL, MAIN_PEP_URL
+from constants import BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, MAIN_PEP_URL
 from exceptions import EmptyResponseException
 from outputs import control_output
 from utils import create_soup, find_tag
@@ -95,7 +95,7 @@ def download(session):
     archive_url = urljoin(downloads_url, pdf_a4_link)
     filename = archive_url.split('/')[-1]
 
-    downloads_dir = DOWNLOAD_DIR
+    downloads_dir = BASE_DIR / 'downloads'
     downloads_dir.mkdir(exist_ok=True)
     archive_path = downloads_dir / filename
 
